@@ -1,0 +1,27 @@
+- name: install nginx
+  ansible.builtin.package:
+    name: nginx
+    state: present
+
+- name: start and enable nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: download the code
+  ansible.builtin.get_url:
+    url: "{{ frontend_url }}"
+    dest: /tmp/frontend.zip
+
+- name: unarchive the code
+  ansible.builtin.unarchive:
+    src: /tmp/frontend.zip
+    dest: /usr/share/nginx/html/
+    remote_src: yes
+
+- name: configure proxy server and copy the file
+  ansible.builtin.template:
+    src: expense.conf.j2
+    dest: /etc/nginx/default.d/expense.conf
+  notify: restart-nginx

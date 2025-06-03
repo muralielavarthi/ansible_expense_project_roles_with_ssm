@@ -1,0 +1,2 @@
+frontend_url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-frontend-v2.zip
+backend_host: backend.emurali.shop

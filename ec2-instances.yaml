@@ -1,0 +1,21 @@
+- name: playbook ec2
+  hosts: local
+  connection: local
+  tasks:
+    - name: install dependencies
+      ansible.builtin.pip:
+        name: "{{ item }}"
+      loop:
+        - botocore
+        - boto3
+    - name: create 3 ec2-instances
+      amazon.aws.ec2_instance:
+        name: "{{ item }}"
+        security_group: sg-09002db929ad2ff12
+        image_id: ami-09c813fb71547fc4f
+        instance_type: t3.micro
+        subnet_id: subnet-0f4dd395530fb0d4d
+      loop:
+        - database
+        - backend
+        - frontend

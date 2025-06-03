@@ -1,0 +1,58 @@
+- name: disable nodejs
+  ansible.builtin.command: dnf module disable nodejs -y
+- name: enable nodejs
+  ansible.builtin.command: dnf module enable nodejs:20 -y
+- name: install nodejs
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - nodejs
+    - mysql
+- name: install dependencies
+  ansible.builtin.pip:
+    name: "{{ item }}"
+  loop:
+    - PyMySQL
+    - cryptography
+- name: create an app directory
+  ansible.builtin.file:
+    path: /app
+    state: directory
+- name: download the code
+  ansible.builtin.get_url:
+    url: "{{ backend_url }}"
+    dest: /tmp/backend.zip
+- name: unarchive the code
+  ansible.builtin.unarchive:
+    src: /tmp/backend.zip
+    dest: /app
+    remote_src: yes
+- name: install dependencies using npm
+  community.general.npm:
+    path: /app
+- name: create expense user
+  ansible.builtin.user:
+    name: expense
+- name: copy backend file to systemctl folder
+  ansible.builtin.template:
+    src: backend.service.j2
+    dest: /etc/systemd/system/backend.service
+- name: load mysql schema
+  community.mysql.mysql_db:
+    login_user: "{{ mysql_user }}"
+    login_password: "{{ mysql_password }}"
+    login_host: database.emurali.shop
+    state: import
+    name: all
+    target: /app/schema/backend.sql
+- name: daemon reload
+  ansible.builtin.systemd_service:
+    name: backend
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+- name: include common role
+  include_role:
+    name: common
+    tasks_from: main
