@@ -1,3 +1,3 @@
 mysql_host: database.emurali.shop
 #mysql_password: ExpenseApp@1
-mysql_password: "{{ lookup('amazon.aws.aws_ssm', 'mysql_password', decrypt=True ) }}"
+mysql_password: "{{ lookup('amazon.aws.aws_ssm', '/expense-project/mysql/mysql_password', decrypt=True ) }}"
